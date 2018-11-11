@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   StyleSheet,
@@ -12,8 +13,8 @@ import { Camera, Permissions } from "expo";
 
 export default class App extends React.Component {
   state = {
-    switchValue: true,
-    hasCameraPermission: true,
+    switchValue: false,
+    hasCameraPermission: null,
     type: Camera.Constants.Type.back,
     imageuri: "",
     imageBase64 : "",
@@ -24,44 +25,68 @@ export default class App extends React.Component {
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
     Permissions.askAsync(Permissions.AUDIO_RECORDING);
     this.setState({ hasCameraPermission: status === "granted" });
-    
+
   }
+
+  cameraChange = () => {
+    this.setState({
+      imageuri: "",
+      url: "",
+      type:
+        this.state.type === Camera.Constants.Type.back
+          ? Camera.Constants.Type.front
+          : Camera.Constants.Type.back
+    });
+  };
 
   snap = async () => {
     if (this.camera) {
-      try{
-          const options = {quality:0.5, base64: true};
-          const data = await this.camera.takePictureAsync(options)
-          this.setState({imageBase64 : data.base64})
-      } catch(e){
-          console.log(e)
+      let photo = await this.camera.takePictureAsync();
+      if (photo) {
+        this.setState({imageBase64 : data.base64})
       }
     }
   };
-    
-
-start = () => {
-  this.timer = setInterval( () => this.snap(),5000);
-};
-
-onComponentWillUnmount(){
-    clearInterval(this.timer);
-}
 
 
-  upload = () => {
-    console.log("pressed the button")
+  upload = async () => {
+    //
     let url = "https://hack-princeton.herokuapp.com/api/get_prediction";
-    fetch(url, {
-        method: "POST", // *GET, POST, PUT, DELETE, etc.
+    // return fetch(url, {
+    //     method: "POST", // *GET, POST, PUT, DELETE, etc.
+    //
+    //     headers: {
+    //         "Content-Type": "application/json; charset=utf-8",
+    //         // "Content-Type": "application/x-www-form-urlencoded",
+    //     },
+    //     body: {"image" : this.state.imageBase64}, // body data type must match "Content-Type" header
+    // })
+    // .then(response => response.json()); // parses response to JSON
 
+    var data = {
+     image : this.state.imageBase64
+    };
+
+    try {
+     let response = await fetch(
+      url,
+      {
+        method: "POST",
         headers: {
-            "Content-Type": "application/json; charset=utf-8",
+         "Accept": "application/json",
+         "Content-Type": "application/json"
         },
-        body: {"image" : this.state.imageBase64} // body data type must match
-    })
-    .then(response => console.log(response.json())); // parses response to JSON
-      
+       body: JSON.stringify(data)
+     }
+    );
+     if (response.status >= 200 && response.status < 300) {
+        console.log(response["_bodyText"]);
+     }
+   } catch (errors) {
+
+     alert(errors);
+    }
+
   };
 
 
@@ -100,7 +125,6 @@ onComponentWillUnmount(){
                   resizeMode="contain"
                 />
               ) : (
-              
                 <Camera
                   style={styles.camera}
                   type={this.state.type}
@@ -108,14 +132,29 @@ onComponentWillUnmount(){
                     this.camera = ref;
                   }}
                 >
-                  
+                  <View style={styles.camerabuttonview}>
+                    <TouchableOpacity
+                      style={styles.cameraButtons}
+                      onPress={this.cameraChange}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 18,
+                          marginBottom: 10,
+                          color: "white"
+                        }}
+                      >
+                        Flip
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </Camera>
               )}
             </View>
           ) : (
             <View style={styles.cameraview}>
               {this.state.url != "" ? (
-                <Text>Uploaded url : {this.state.url}</Text>
+                <Text>Uploaded url : {"https://hack-princeton.herokuapp.com"}</Text>
               ) : null}
               <Text>Camera off</Text>
             </View>
@@ -124,15 +163,15 @@ onComponentWillUnmount(){
             <View style={styles.buttonsView}>
               {this.state.imageuri == "" ? (
                 <View style={styles.captureButtonView}>
-              
+
                   <TouchableOpacity
                     style={styles.cameraButtons}
-                    onPress={this.start}
+                    onPress={this.snap}
                   >
                     <Text
                       style={{ fontSize: 18, marginBottom: 10, color: "white" }}
                     >
-                      Start
+                      Capture
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -176,10 +215,10 @@ const styles = StyleSheet.create({
     padding: 5
   },
   cameraview: {
-    height: 400,
-    width: "90%",
-    backgroundColor: "white",
-    borderRadius: 5,
+    height: "70%",
+    width: "100%",
+    backgroundColor: "green",
+    borderRadius: 2,
     justifyContent: "center",
     alignItems: "center"
   },
