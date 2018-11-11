@@ -16,6 +16,7 @@ export default class App extends React.Component {
     hasCameraPermission: true,
     type: Camera.Constants.Type.back,
     imageuri: "",
+    imageBase64 : "",
     url: ""
   };
 
@@ -31,16 +32,16 @@ export default class App extends React.Component {
       try{
           const options = {quality:0.5, base64: true};
           const data = await this.camera.takePictureAsync(options)
-          console.log(data.uri)
+          this.setState({imageBase64 : data.base64})
       } catch(e){
-          console.log(es)
+          console.log(e)
       }
     }
   };
     
 
 start = () => {
-  this.timer = setInterval( () => this.snap(),100);
+  this.timer = setInterval( () => this.snap(),5000);
 };
 
 onComponentWillUnmount(){
@@ -49,20 +50,17 @@ onComponentWillUnmount(){
 
 
   upload = () => {
-    const file = {
-      uri: this.state.imageuri,
-      name: `${new Date().getTime()}.jpg`,
-      type: "image/jpeg"
-    };
-    const options = {
-      keyPrefix: "ts/",
-      bucket: "..name..",
-      region: "eu-west-1",
-      accessKey: "..acesskey..",
-      secretKey: "..secretkey..",
-      successActionStatus: 201
-    };
-    
+    console.log("pressed the button")
+    let url = "https://hack-princeton.herokuapp.com/api/get_prediction";
+    fetch(url, {
+        method: "POST", // *GET, POST, PUT, DELETE, etc.
+
+        headers: {
+            "Content-Type": "application/json; charset=utf-8",
+        },
+        body: {"image" : this.state.imageBase64} // body data type must match
+    })
+    .then(response => console.log(response.json())); // parses response to JSON
       
   };
 
