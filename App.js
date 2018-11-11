@@ -13,7 +13,7 @@ import { Camera, Permissions } from "expo";
 
 export default class App extends React.Component {
   state = {
-    switchValue: false,
+    switchValue: true,
     hasCameraPermission: null,
     type: Camera.Constants.Type.back,
     imageuri: "",
@@ -105,14 +105,7 @@ export default class App extends React.Component {
       return (
         <View style={styles.container}>
           <View style={styles.switchview}>
-            <Text>Show camera</Text>
-            <Switch
-              onValueChange={value => {
-                this.setState({ switchValue: value });
-              }}
-              value={this.state.switchValue}
-              style={styles.switch}
-            />
+          <Image source={require('./assets/icon.png')} style={{width:50, height:50}}/>
           </View>
           {this.state.switchValue ? (
             <View style={styles.cameraview}>
@@ -137,15 +130,6 @@ export default class App extends React.Component {
                       style={styles.cameraButtons}
                       onPress={this.cameraChange}
                     >
-                      <Text
-                        style={{
-                          fontSize: 18,
-                          marginBottom: 10,
-                          color: "white"
-                        }}
-                      >
-                        Flip
-                      </Text>
                     </TouchableOpacity>
                   </View>
                 </Camera>
@@ -171,7 +155,7 @@ export default class App extends React.Component {
                     <Text
                       style={{ fontSize: 18, marginBottom: 10, color: "white" }}
                     >
-                      Capture
+                      Start
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -199,7 +183,7 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1dd1a1",
+    backgroundColor: "white",
     alignItems: "center",
     justifyContent: "flex-start"
   },
@@ -217,7 +201,7 @@ const styles = StyleSheet.create({
   cameraview: {
     height: "70%",
     width: "100%",
-    backgroundColor: "green",
+    backgroundColor: "white",
     borderRadius: 2,
     justifyContent: "center",
     alignItems: "center"
@@ -235,7 +219,6 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent"
   },
   cameraButtons: {
-    borderColor: "#fff",
     backgroundColor: "black",
     borderWidth: 2,
     padding: 10,
